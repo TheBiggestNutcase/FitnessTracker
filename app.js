@@ -54,44 +54,44 @@ function initializeApp() {
 
 function loadSampleData() {
     const sampleEntries = [
-        {
-            id: "entry1",
-            date: "2024-08-10",
-            weight: 65.5,
-            measurements: { waist: 28, hips: 36, thighs: 22, arms: 11 },
-            progressPhotos: "",
-            calories: 1800,
-            protein: 120,
-            carbQuality: "Good - mostly whole grains",
-            sugar: 45,
-            waterIntake: 2.5,
-            workoutSessions: 1,
-            steps: 8500,
-            strengthProgress: "Increased deadlift by 5lbs",
-            menstrualCycle: "",
-            energyMood: "High energy, positive mood",
-            sleepQuality: "Good",
-            sleepDuration: 7.5
-        },
-        {
-            id: "entry2", 
-            date: "2024-08-11",
-            weight: 65.3,
-            measurements: { waist: 28, hips: 36, thighs: 22, arms: 11 },
-            progressPhotos: "",
-            calories: 1750,
-            protein: 115,
-            carbQuality: "Fair - some processed foods",
-            sugar: 50,
-            waterIntake: 2.2,
-            workoutSessions: 1,
-            steps: 7200,
-            strengthProgress: "Rest day - light stretching",
-            menstrualCycle: "",
-            energyMood: "Moderate energy, calm",
-            sleepQuality: "Fair",
-            sleepDuration: 6.5
-        }
+        // {
+        //     id: "entry1",
+        //     date: "2024-08-10",
+        //     weight: 65.5,
+        //     measurements: { waist: 28, hips: 36, thighs: 22, arms: 11 },
+        //     progressPhotos: "",
+        //     calories: 1800,
+        //     protein: 120,
+        //     carbQuality: "Good - mostly whole grains",
+        //     sugar: 45,
+        //     waterIntake: 2.5,
+        //     workoutSessions: 1,
+        //     steps: 8500,
+        //     strengthProgress: "Increased deadlift by 5lbs",
+        //     menstrualCycle: "",
+        //     energyMood: "High energy, positive mood",
+        //     sleepQuality: "Good",
+        //     sleepDuration: 7.5
+        // },
+        // {
+        //     id: "entry2", 
+        //     date: "2024-08-11",
+        //     weight: 65.3,
+        //     measurements: { waist: 28, hips: 36, thighs: 22, arms: 11 },
+        //     progressPhotos: "",
+        //     calories: 1750,
+        //     protein: 115,
+        //     carbQuality: "Fair - some processed foods",
+        //     sugar: 50,
+        //     waterIntake: 2.2,
+        //     workoutSessions: 1,
+        //     steps: 7200,
+        //     strengthProgress: "Rest day - light stretching",
+        //     menstrualCycle: "",
+        //     energyMood: "Moderate energy, calm",
+        //     sleepQuality: "Fair",
+        //     sleepDuration: 6.5
+        // }
     ];
     
     fitnessData = [...sampleEntries];
