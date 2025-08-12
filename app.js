@@ -37,8 +37,9 @@ function initializeApp() {
             console.log('Default date set');
         }
         
-        // Initialize views - make sure form view is active by default
-        showView('form');
+        // Initialize views - make sure dashboard view is active by default
+        showView('dashboard');
+        setActiveNav('dashboard');
         
         // Initialize table and dashboard data
         updateTable();
