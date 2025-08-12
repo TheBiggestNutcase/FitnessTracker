@@ -7,6 +7,7 @@ let currentYear = new Date().getFullYear();
 // Chart instances
 let stepsChart = null;
 let weightChart = null;
+let sleepChart = null;
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -707,6 +708,7 @@ function updateCharts() {
         try {
             updateStepsChart();
             updateWeightChart();
+            updateSleepChart(); // Add this line
         } catch (error) {
             console.error('Error updating charts:', error);
         }
@@ -830,6 +832,106 @@ function updateWeightChart() {
     });
 
     console.log('Weight chart updated');
+}
+
+function updateSleepChart() {
+    const canvas = document.getElementById('sleep-chart');
+    if (!canvas) {
+        console.warn('Sleep chart canvas not found');
+        return;
+    }
+
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded');
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    const last30Days = getLast30DaysData();
+
+    // Define color scale for sleep quality
+    const qualityColors = {
+        'Excellent': '#134252',
+        'Good': '#21808D',
+        'Fair': '#2D93A0',
+        'Poor': '#32B8C6',
+        'None': 'rgba(245, 245, 245, 0.5)' // Light gray for no data
+    };
+
+    const chartData = last30Days.map((entry, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (29 - index));
+
+        const quality = entry?.sleepQuality || 'None';
+        const duration = entry?.sleepDuration || null;
+
+        return {
+            x: date,
+            y: duration,
+            quality: quality,
+            color: qualityColors[quality]
+        };
+    }).filter(d => d.y !== null);
+
+    if (sleepChart) {
+        sleepChart.destroy();
+    }
+
+    sleepChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Sleep Duration (hours)',
+                data: chartData,
+                borderColor: '#21808D',
+                backgroundColor: chartData.map(d => d.color),
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                fill: false,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const dataPoint = context.raw;
+                            const date = dataPoint.x.toLocaleDateString();
+                            const duration = dataPoint.y;
+                            const quality = dataPoint.quality;
+                            return `Date: ${date}, Duration: ${duration}h, Quality: ${quality}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Sleep Duration (hours)'
+                    }
+                }
+            }
+        }
+    });
+    console.log('Sleep chart updated');
 }
 
 function getLast30DaysData() {
