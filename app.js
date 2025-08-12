@@ -3,6 +3,7 @@ let fitnessData = [];
 let currentEditId = null;
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
+let selectedSummaryDate = null; // Add this new variable
 
 // Chart instances
 let stepsChart = null;
@@ -212,6 +213,21 @@ function setupEventListeners() {
             handleFormSubmit(e);
         });
     }
+    document.getElementById('heatmap-calendar').addEventListener('click', (e) => {
+        if (e.target.classList.contains('calendar-day') && !e.target.classList.contains('calendar-day-header')) {
+            const day = e.target.textContent;
+            const month = currentMonth + 1;
+            const year = currentYear;
+
+            // Format the date string
+            const monthStr = month < 10 ? `0${month}` : month;
+            const dayStr = day < 10 ? `0${day}` : day;
+
+            selectedSummaryDate = `${year}-${monthStr}-${dayStr}`;
+            updateFitnessSummary();
+        }
+    });
+
 
     // Cancel edit button
     const cancelBtn = document.getElementById('cancel-edit');
@@ -778,7 +794,7 @@ function updateStepsChart() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString();
                         }
                     }
@@ -912,7 +928,7 @@ function updateSleepChart() {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             const dataPoint = context.raw;
                             const date = dataPoint.x.toLocaleDateString();
                             const duration = dataPoint.y;
@@ -1022,6 +1038,11 @@ function updateHeatmapCalendar() {
 
     calendar.innerHTML = calendarHTML;
     console.log('Heatmap calendar updated');
+    // Initial update for summary
+    if (!selectedSummaryDate) {
+        selectedSummaryDate = fitnessData.length > 0 ? fitnessData[0].date : new Date().toISOString().split('T')[0];
+    }
+    updateFitnessSummary();
 }
 
 function navigateMonth(direction) {
@@ -1059,26 +1080,26 @@ function exportData() {
 function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         try {
             const importedData = JSON.parse(event.target.result);
-            
+
             if (!Array.isArray(importedData)) {
                 throw new Error('Invalid data format - expected array');
             }
-            
+
             let merged = 0;
             let added = 0;
-            
+
             importedData.forEach(entry => {
                 if (!entry.date) return;
-                
-                const existingIndex = fitnessData.findIndex(existing => 
+
+                const existingIndex = fitnessData.findIndex(existing =>
                     existing.date === entry.date
                 );
-                
+
                 if (existingIndex !== -1) {
                     fitnessData[existingIndex] = { ...entry, id: fitnessData[existingIndex].id };
                     merged++;
@@ -1087,21 +1108,21 @@ function importData(e) {
                     added++;
                 }
             });
-            
+
             sortDataByDate();
             updateTable();
-            
+
             updateDashboard();
-            
+
             showStatusMessage(`Data imported! Added ${added} new entries, merged ${merged} existing entries.`, 'success');
             console.log('Data imported:', { added, merged });
-            
+
         } catch (error) {
             console.error('Import error:', error);
             showStatusMessage('Error importing data: Invalid file format', 'error');
         }
     };
-    
+
     reader.readAsText(file);
     e.target.value = '';
 }
@@ -1154,6 +1175,47 @@ function saveDataToFile() {
     } catch (error) {
         console.error('Save error:', error);
     }
+}
+
+function updateFitnessSummary() {
+    const summaryContent = document.getElementById('summary-content');
+    const summaryDateEl = document.getElementById('summary-date');
+
+    if (!summaryContent || !summaryDateEl || !selectedSummaryDate) {
+        return;
+    }
+
+    const date = formatDate(selectedSummaryDate);
+    summaryDateEl.textContent = date;
+
+    const dailyWorkouts = fitnessData.filter(entry => entry.date === selectedSummaryDate && entry.type === 'workout');
+
+    if (dailyWorkouts.length === 0) {
+        summaryContent.innerHTML = '<p>No specific workouts tracked for this day.</p>';
+        return;
+    }
+
+    let totalWorkouts = dailyWorkouts.length;
+    let muscleAreas = [...new Set(dailyWorkouts.map(w => w.muscleArea))].join(', ');
+
+    let summaryHTML = `
+        <p><strong>Workouts Done:</strong> ${totalWorkouts}</p>
+        <p><strong>Muscle Focus:</strong> ${muscleAreas}</p>
+        <h4>Workout Details:</h4>
+        <ul>
+    `;
+
+    dailyWorkouts.forEach(workout => {
+        const weight = workout.weight ? `${workout.weight} kg` : 'N/A';
+        summaryHTML += `
+            <li>
+                <strong>${workout.workoutType}</strong>: ${weight}
+            </li>
+        `;
+    });
+
+    summaryHTML += '</ul>';
+    summaryContent.innerHTML = summaryHTML;
 }
 
 // Global functions for onclick handlers
