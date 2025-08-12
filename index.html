@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Fitness Tracker</h1>
+            <nav class="nav">
+                <button class="btn btn--secondary nav-btn active" data-view="form">Add Entry</button>
+                <button class="btn btn--secondary nav-btn" data-view="table">View Data</button>
+                <button class="btn btn--secondary nav-btn" data-view="dashboard">Dashboard</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main container">
+        <!-- Data Entry Form -->
+        <section id="form-view" class="view active">
+            <div class="card">
+                <div class="card__header">
+                    <h2 id="form-title">Add New Entry</h2>
+                </div>
+                <div class="card__body">
+                    <form id="fitness-form">
+                        <input type="hidden" id="entry-id" value="">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="entry-date">Date</label>
+                            <input type="date" id="entry-date" class="form-control" required>
+                        </div>
+
+                        <!-- Body & Progress Tracking -->
+                        <fieldset class="fieldset">
+                            <legend>Body & Progress Tracking</legend>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="weight">Weight (kg)</label>
+                                    <input type="number" id="weight" class="form-control" step="0.1" min="0">
+                                </div>
+                            </div>
+                            
+                            <div class="measurements-group">
+                                <h4>Body Measurements (cm)</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="waist">Waist</label>
+                                        <input type="number" id="waist" class="form-control" step="0.1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="hips">Hips</label>
+                                        <input type="number" id="hips" class="form-control" step="0.1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="thighs">Thighs</label>
+                                        <input type="number" id="thighs" class="form-control" step="0.1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="arms">Arms</label>
+                                        <input type="number" id="arms" class="form-control" step="0.1" min="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="progress-photos">Progress Photos (optional)</label>
+                                <textarea id="progress-photos" class="form-control" rows="2" placeholder="Photo descriptions or URLs"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <!-- Nutrition Tracking -->
+                        <fieldset class="fieldset">
+                            <legend>Nutrition Tracking</legend>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="calories">Calories</label>
+                                    <input type="number" id="calories" class="form-control" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="protein">Protein (g)</label>
+                                    <input type="number" id="protein" class="form-control" min="0">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="sugar">Sugar (g)</label>
+                                    <input type="number" id="sugar" class="form-control" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="water-intake">Water (L)</label>
+                                    <input type="number" id="water-intake" class="form-control" step="0.1" min="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="carb-quality">Carb Quality</label>
+                                <textarea id="carb-quality" class="form-control" rows="2" placeholder="Describe carb sources and quality"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <!-- Exercise Tracking -->
+                        <fieldset class="fieldset">
+                            <legend>Exercise Tracking</legend>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="workout-sessions">Workout Sessions</label>
+                                    <input type="number" id="workout-sessions" class="form-control" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="steps">Steps</label>
+                                    <input type="number" id="steps" class="form-control" min="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="strength-progress">Strength Progress</label>
+                                <textarea id="strength-progress" class="form-control" rows="2" placeholder="Notes on strength improvements"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <!-- PCOS & Health Markers -->
+                        <fieldset class="fieldset">
+                            <legend>PCOS & Health Markers</legend>
+                            <div class="form-group">
+                                <label class="form-label" for="menstrual-cycle">Menstrual Cycle Date (optional)</label>
+                                <input type="date" id="menstrual-cycle" class="form-control">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="sleep-duration">Sleep Duration (hours)</label>
+                                    <input type="number" id="sleep-duration" class="form-control" step="0.5" min="0" max="24">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="sleep-quality">Sleep Quality</label>
+                                    <select id="sleep-quality" class="form-control">
+                                        <option value="">Select quality</option>
+                                        <option value="Poor">Poor</option>
+                                        <option value="Fair">Fair</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Excellent">Excellent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="energy-mood">Energy & Mood</label>
+                                <textarea id="energy-mood" class="form-control" rows="2" placeholder="Describe your energy levels and mood"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary">Save Entry</button>
+                            <button type="button" id="cancel-edit" class="btn btn--secondary hidden">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Table View -->
+        <section id="table-view" class="view">
+            <div class="card">
+                <div class="card__header">
+                    <h2>Fitness Entries</h2>
+                    <div class="table-controls">
+                        <input type="text" id="search-input" class="form-control" placeholder="Search entries...">
+                        <button class="btn btn--secondary" id="clear-search">Clear</button>
+                    </div>
+                </div>
+                <div class="card__body">
+                    <div class="table-container">
+                        <table id="entries-table" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Weight</th>
+                                    <th>Calories</th>
+                                    <th>Workouts</th>
+                                    <th>Steps</th>
+                                    <th>Sleep</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-data" class="no-data hidden">
+                        <p>No entries found. <a href="#" onclick="switchView('form')">Add your first entry</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard View -->
+        <section id="dashboard-view" class="view">
+            <div class="dashboard-grid">
+                <!-- Key Metrics Cards -->
+                <div class="metrics-row">
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Total Workouts</h3>
+                            <div class="metric-value" id="total-workouts">0</div>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Current Streak</h3>
+                            <div class="metric-value" id="workout-streak">0 days</div>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Avg Daily Steps</h3>
+                            <div class="metric-value" id="avg-steps">0</div>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Last Period</h3>
+                            <div class="metric-value" id="last-period">Not recorded</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="card chart-card">
+                        <div class="card__header">
+                            <h3>Daily Steps</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="steps-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="card__header">
+                            <h3>Weight Progress</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="weight-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heatmap Calendar -->
+                <div class="card heatmap-card">
+                    <div class="card__header">
+                        <h3>Workout Streak Calendar</h3>
+                        <div class="calendar-controls">
+                            <button class="btn btn--sm" id="prev-month">&lt;</button>
+                            <span id="current-month-year"></span>
+                            <button class="btn btn--sm" id="next-month">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="card__body">
+                        <div id="heatmap-calendar"></div>
+                        <div class="heatmap-legend">
+                            <span>Less</span>
+                            <div class="legend-scale">
+                                <div class="legend-item" data-level="0"></div>
+                                <div class="legend-item" data-level="1"></div>
+                                <div class="legend-item" data-level="2"></div>
+                                <div class="legend-item" data-level="3"></div>
+                                <div class="legend-item" data-level="4"></div>
+                            </div>
+                            <span>More</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="data-management">
+                <button class="btn btn--primary" id="export-data">Download Data (JSON)</button>
+                <div class="file-input-wrapper">
+                    <input type="file" id="import-data" accept=".json" class="hidden">
+                    <button class="btn btn--secondary" onclick="document.getElementById('import-data').click()">Upload Data (JSON)</button>
+                </div>
+            </div>
+            <div class="status-message hidden" id="status-message"></div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
