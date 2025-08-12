@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <header class="header">
         <div class="container">
@@ -14,6 +16,7 @@
             <nav class="nav">
                 <button class="btn btn--secondary nav-btn active" data-view="dashboard">Dashboard</button>
                 <button class="btn btn--secondary nav-btn" data-view="form">Add Entry</button>
+                <button class="btn btn--secondary nav-btn" data-view="fitness-form">Fitness Tracker</button>
                 <button class="btn btn--secondary nav-btn" data-view="table">View Data</button>
             </nav>
         </div>
@@ -29,7 +32,7 @@
                 <div class="card__body">
                     <form id="fitness-form">
                         <input type="hidden" id="entry-id" value="">
-                        
+
                         <div class="form-group">
                             <label class="form-label" for="entry-date">Date</label>
                             <input type="date" id="entry-date" class="form-control" required>
@@ -44,7 +47,7 @@
                                     <input type="number" id="weight" class="form-control" step="0.1" min="0">
                                 </div>
                             </div>
-                            
+
                             <div class="measurements-group">
                                 <h4>Body Measurements (cm)</h4>
                                 <div class="form-row">
@@ -69,7 +72,8 @@
 
                             <div class="form-group">
                                 <label class="form-label" for="progress-photos">Progress Photos (optional)</label>
-                                <textarea id="progress-photos" class="form-control" rows="2" placeholder="Photo descriptions or URLs"></textarea>
+                                <textarea id="progress-photos" class="form-control" rows="2"
+                                    placeholder="Photo descriptions or URLs"></textarea>
                             </div>
                         </fieldset>
 
@@ -98,7 +102,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="carb-quality">Carb Quality</label>
-                                <textarea id="carb-quality" class="form-control" rows="2" placeholder="Describe carb sources and quality"></textarea>
+                                <textarea id="carb-quality" class="form-control" rows="2"
+                                    placeholder="Describe carb sources and quality"></textarea>
                             </div>
                         </fieldset>
 
@@ -117,7 +122,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="strength-progress">Strength Progress</label>
-                                <textarea id="strength-progress" class="form-control" rows="2" placeholder="Notes on strength improvements"></textarea>
+                                <textarea id="strength-progress" class="form-control" rows="2"
+                                    placeholder="Notes on strength improvements"></textarea>
                             </div>
                         </fieldset>
 
@@ -131,7 +137,8 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label" for="sleep-duration">Sleep Duration (hours)</label>
-                                    <input type="number" id="sleep-duration" class="form-control" step="0.5" min="0" max="24">
+                                    <input type="number" id="sleep-duration" class="form-control" step="0.5" min="0"
+                                        max="24">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" for="sleep-quality">Sleep Quality</label>
@@ -146,7 +153,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="energy-mood">Energy & Mood</label>
-                                <textarea id="energy-mood" class="form-control" rows="2" placeholder="Describe your energy levels and mood"></textarea>
+                                <textarea id="energy-mood" class="form-control" rows="2"
+                                    placeholder="Describe your energy levels and mood"></textarea>
                             </div>
                         </fieldset>
 
@@ -198,12 +206,17 @@
         <!-- Dashboard View -->
         <section id="dashboard-view" class="view">
             <div class="dashboard-grid">
-                <!-- Key Metrics Cards -->
                 <div class="metrics-row">
                     <div class="card metric-card">
                         <div class="card__body">
-                            <h3>Total Workouts</h3>
-                            <div class="metric-value" id="total-workouts">0</div>
+                            <h3>Total Workouts (Month)</h3>
+                            <div class="metric-value" id="total-workouts-month">0</div>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Total Steps (Month)</h3>
+                            <div class="metric-value" id="total-steps-month">0</div>
                         </div>
                     </div>
                     <div class="card metric-card">
@@ -214,19 +227,12 @@
                     </div>
                     <div class="card metric-card">
                         <div class="card__body">
-                            <h3>Avg Daily Steps</h3>
-                            <div class="metric-value" id="avg-steps">0</div>
-                        </div>
-                    </div>
-                    <div class="card metric-card">
-                        <div class="card__body">
                             <h3>Last Period</h3>
                             <div class="metric-value" id="last-period">Not recorded</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Charts Row -->
                 <div class="charts-row">
                     <div class="card chart-card">
                         <div class="card__header">
@@ -250,7 +256,6 @@
                     </div>
                 </div>
 
-                <!-- Heatmap Calendar -->
                 <div class="card heatmap-card">
                     <div class="card__header">
                         <h3>Workout Streak Calendar</h3>
@@ -277,6 +282,53 @@
                 </div>
             </div>
         </section>
+        <section id="fitness-form-view" class="view">
+            <div class="card">
+                <div class="card__header">
+                    <h2>Track Workout</h2>
+                </div>
+                <div class="card__body">
+                    <form id="workout-form">
+                        <div class="form-group">
+                            <label class="form-label" for="workout-date">Date</label>
+                            <input type="date" id="workout-date" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="muscle-area">Muscle Area</label>
+                            <select id="muscle-area" class="form-control" required>
+                                <option value="">Select muscle area</option>
+                                <option value="ARMS">ARMS</option>
+                                <option value="BACK">BACK</option>
+                                <option value="CHEST">CHEST</option>
+                                <option value="CORE">CORE</option>
+                                <option value="FULL BODY">FULL BODY</option>
+                                <option value="LEGS">LEGS</option>
+                                <option value="LOWER BODY">LOWER BODY</option>
+                                <option value="SHOULDERS">SHOULDERS</option>
+                                <option value="UPPER BODY">UPPER BODY</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="workout-type">Workout</label>
+                            <select id="workout-type" class="form-control" required>
+                                <option value="">Select a muscle area first</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="workout-weight">Weight (kg)</label>
+                            <input type="number" id="workout-weight" class="form-control" step="0.1" min="0">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary">Save Workout</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -285,7 +337,8 @@
                 <button class="btn btn--primary" id="export-data">Download Data (JSON)</button>
                 <div class="file-input-wrapper">
                     <input type="file" id="import-data" accept=".json" class="hidden">
-                    <button class="btn btn--secondary" onclick="document.getElementById('import-data').click()">Upload Data (JSON)</button>
+                    <button class="btn btn--secondary" onclick="document.getElementById('import-data').click()">Upload
+                        Data (JSON)</button>
                 </div>
             </div>
             <div class="status-message hidden" id="status-message"></div>
@@ -294,4 +347,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

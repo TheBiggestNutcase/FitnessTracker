@@ -1,0 +1,115 @@
+I want to add a new tab to track fitness specifically. 
+
+I want to track:
+
+
+
+1. Which muscle area I focused on: ARMS, BACK, CHEST, CORE, FULL BODY, LEGS, LOWER BODY, SHOULDERS, UPPER BODY
+
+2. After selecting the muscle area, the workout I did, and the weight amount. Each muscle area has differenet workouts:
+
+    a. Arms:
+    - Dumbell Bicep Curl
+    - Tricep Extension
+    - Barbell Bicep Curl
+    - Standing wide grip bicep cable curls
+    - Standing cable tricep push down with rope
+    - kettlebell overhead tricep Extension
+    - barbell close grup bicep curls
+    - barbell wide grip bicep curls
+    - inclined dumbell seated seesaw hammer curls
+    - inclined dumbell seated hammer Curl
+    - inclined dumbell seated alternating hammer Curl
+    - Single arm dumbell seated reverse curl
+    - Dumbbells Double Arm Inner Biceps Curls
+    - Dumbbells Double Arm Zottman Curls
+    - Dumbbell Reverse Curls
+    - Knee Down Sphinx Push Ups
+    - Barbell Elevator Curls
+    - Dumbbell Seated Bicep Curl
+    - Bench Dips
+    - Alternating Bicep Curl
+    - Barbell Close Grip Curls
+    - 1-arm Zottman Curls
+    - PREACHER CURL MACHINE
+    - Ez Barbell Curl
+    - Ez Bar Trice Extension
+    - Dumbbell Forearm Curls
+    - Bodyweight Tricep Dips
+    - Lying Double Arm Skull Crusher
+
+    b. Back
+    - Barbell Deadlifts
+    - Dumbbell Bent Over Row
+    - Lat Pull Down
+    - Barbell bent over rows
+    - Standing Wide Grip Cable Rows
+    - Single Knee Down High Plank Rowing
+    - Kettlbell Double Arm Shrugs
+    - Kettlebell Single Arm Bent Over Rows
+    - Kettlebells Bent Over Alternating Rows
+    - Kettlebells Bent Over Rows
+    - Kettlbell Bent Crush Row
+    - Barbell Supinated Bent Over Rows
+    - Seated Archer Stretch
+    - Dumbbells Alternating Bent Over Row
+    - Single Arm Dumbbell Chest Supported Rows
+    - Goodmorning
+    - Single Leg Half Forward Fold
+    - Standing Half Lat Stretch
+    - Standing Half Straddle Stretch
+    - Bent Over T Spine Rotations
+    - Bent Over T Spine Rotations- Advanced
+    - Plate Loaded Lat Pull Down
+    - Single Arm Plate Loaded Lat Pull
+    - Pendlay rows
+    - Seated Wide Grip Lat Pull Down Bar
+    - Seated Neutral Grip Horizontal Row
+    - Seated Close Grip Horizontal Row
+    - Seated Reverse Cose Grip Horizontal Row
+    - Seated Reverse WIDE Horizontal Row
+
+    c. Chest
+    - Machine Chest Flyes
+    - Barbell Bench Press
+    - Incline Bench Press
+    - Dumbbell Bench Press
+    - Push Up To Mountain
+    - Knee Down Pseudo Push Ups
+    - Pseudo Push Ups
+    - Pulse Pushups
+    - Incline Dumbbell Seesaw Bench Press
+    - Incline Dumbbell Alternating Bench Press
+    - DOUBLE ARM DUMBBELL INCLINE FLYES
+    - Weighted Pullover
+    - Knee Down Deficit Push Up
+    - 1 Arm Incline Dumbbell Bench Press
+    - Dumbbell Close Grip Floor Press
+    - Double Arm Chest Press
+    - Dips
+    - Knee Down Close Grip Push Ups
+    - Knee Down Hand Release Push Up
+    - Plate Loaded Altenate arm Incline Press
+    - Plate Loaded One arm Hold Inclined Press
+    - Kettlebell Pull Over
+    - Plate Trice Dips
+    - Incline Wide Grip Bench Press
+    - Incline 1.5 Close Grip Bench Press
+    - Incline 1.5 Neutral Grip Bench Press
+    - Incline Reverse Grip Bench Press
+    - Decline Wide Grip bench press
+    - Decline Pause Wide grip bench press
+    - Decline Wide Grip bench press
+    - Decline Pause Wide grip bench press
+    - Decline Close Grip bench press
+
+    d. Core 
+
+
+    e. Full Body
+    f. LEGS, 
+    g. LOWER BODY, 
+    h. SHOULDERS, 
+    i. UPPER BODY
+
+    The sub categories will be added later by me. Please let me know how to update the files

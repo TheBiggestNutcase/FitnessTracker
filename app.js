@@ -9,44 +9,93 @@ let stepsChart = null;
 let weightChart = null;
 
 // Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM loaded, initializing app...');
-    
+
     // Small delay to ensure everything is loaded
     setTimeout(() => {
         initializeApp();
     }, 100);
 });
 
+const workouts = {
+    ARMS: [
+        "Dumbell Bicep Curl", "Tricep Extension", "Barbell Bicep Curl", "Standing wide grip bicep cable curls",
+        "Standing cable tricep push down with rope", "kettlebell overhead tricep Extension",
+        "barbell close grup bicep curls", "barbell wide grip bicep curls",
+        "inclined dumbell seated seesaw hammer curls", "inclined dumbell seated hammer Curl",
+        "inclined dumbell seated alternating hammer Curl", "Single arm dumbell seated reverse curl",
+        "Dumbbells Double Arm Inner Biceps Curls", "Dumbbells Double Arm Zottman Curls",
+        "Dumbbell Reverse Curls", "Knee Down Sphinx Push Ups", "Barbell Elevator Curls",
+        "Dumbbell Seated Bicep Curl", "Bench Dips", "Alternating Bicep Curl",
+        "Barbell Close Grip Curls", "1-arm Zottman Curls", "PREACHER CURL MACHINE",
+        "Ez Barbell Curl", "Ez Bar Trice Extension", "Dumbbell Forearm Curls",
+        "Bodyweight Tricep Dips", "Lying Double Arm Skull Crusher"
+    ],
+    BACK: [
+        "Barbell Deadlifts", "Dumbbell Bent Over Row", "Lat Pull Down", "Barbell bent over rows",
+        "Standing Wide Grip Cable Rows", "Single Knee Down High Plank Rowing", "Kettlbell Double Arm Shrugs",
+        "Kettlebell Single Arm Bent Over Rows", "Kettlebells Bent Over Alternating Rows",
+        "Kettlebells Bent Over Rows", "Kettlbell Bent Crush Row", "Barbell Supinated Bent Over Rows",
+        "Seated Archer Stretch", "Dumbbells Alternating Bent Over Row", "Single Arm Dumbbell Chest Supported Rows",
+        "Goodmorning", "Single Leg Half Forward Fold", "Standing Half Lat Stretch",
+        "Standing Half Straddle Stretch", "Bent Over T Spine Rotations", "Bent Over T Spine Rotations- Advanced",
+        "Plate Loaded Lat Pull Down", "Single Arm Plate Loaded Lat Pull", "Pendlay rows",
+        "Seated Wide Grip Lat Pull Down Bar", "Seated Neutral Grip Horizontal Row",
+        "Seated Close Grip Horizontal Row", "Seated Reverse Cose Grip Horizontal Row",
+        "Seated Reverse WIDE Horizontal Row"
+    ],
+    CHEST: [
+        "Machine Chest Flyes", "Barbell Bench Press", "Incline Bench Press", "Dumbbell Bench Press",
+        "Push Up To Mountain", "Knee Down Pseudo Push Ups", "Pseudo Push Ups", "Pulse Pushups",
+        "Incline Dumbbell Seesaw Bench Press", "Incline Dumbbell Alternating Bench Press",
+        "DOUBLE ARM DUMBBELL INCLINE FLYES", "Weighted Pullover", "Knee Down Deficit Push Up",
+        "1 Arm Incline Dumbbell Bench Press", "Dumbbell Close Grip Floor Press", "Double Arm Chest Press",
+        "Dips", "Knee Down Close Grip Push Ups", "Knee Down Hand Release Push Up",
+        "Plate Loaded Altenate arm Incline Press", "Plate Loaded One arm Hold Inclined Press",
+        "Kettlebell Pull Over", "Plate Trice Dips", "Incline Wide Grip Bench Press",
+        "Incline 1.5 Close Grip Bench Press", "Incline 1.5 Neutral Grip Bench Press",
+        "Incline Reverse Grip Bench Press", "Decline Wide Grip bench press",
+        "Decline Pause Wide grip bench press", "Decline Wide Grip bench press",
+        "Decline Pause Wide grip bench press", "Decline Close Grip bench press"
+    ],
+    CORE: [],
+    'FULL BODY': [],
+    LEGS: [],
+    'LOWER BODY': [],
+    SHOULDERS: [],
+    'UPPER BODY': []
+};
+
 function initializeApp() {
     try {
         console.log('Starting app initialization...');
-        
+
         // Load sample data first
         loadSampleData();
         console.log('Sample data loaded');
-        
+
         // Set up event listeners
         setupEventListeners();
         console.log('Event listeners setup complete');
-        
+
         // Set today's date as default
         const dateInput = document.getElementById('entry-date');
         if (dateInput) {
             dateInput.valueAsDate = new Date();
             console.log('Default date set');
         }
-        
+
         // Initialize views - make sure dashboard view is active by default
         showView('dashboard');
         setActiveNav('dashboard');
-        
+
         // Initialize table and dashboard data
         updateTable();
         updateDashboard();
-        
+
         console.log('Fitness Tracker initialized successfully');
-        
+
     } catch (error) {
         console.error('Error initializing app:', error);
     }
@@ -93,18 +142,18 @@ function loadSampleData() {
         //     sleepDuration: 6.5
         // }
     ];
-    
+
     fitnessData = [...sampleEntries];
 }
 
 function setupEventListeners() {
     console.log('Setting up event listeners...');
-    
+
     // Navigation buttons - use more explicit event handling
     const formBtn = document.querySelector('[data-view="form"]');
     const tableBtn = document.querySelector('[data-view="table"]');
     const dashboardBtn = document.querySelector('[data-view="dashboard"]');
-    
+
     if (formBtn) {
         formBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -113,7 +162,7 @@ function setupEventListeners() {
             setActiveNav('form');
         });
     }
-    
+
     if (tableBtn) {
         tableBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -122,7 +171,7 @@ function setupEventListeners() {
             setActiveNav('table');
         });
     }
-    
+
     if (dashboardBtn) {
         dashboardBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -133,17 +182,36 @@ function setupEventListeners() {
             setTimeout(() => updateDashboard(), 200);
         });
     }
-    
+    const fitnessFormBtn = document.querySelector('[data-view="fitness-form"]');
+    if (fitnessFormBtn) {
+        fitnessFormBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Fitness form nav clicked');
+            showView('fitness-form');
+            setActiveNav('fitness-form');
+        });
+    }
+
+    const workoutForm = document.getElementById('workout-form');
+    if (workoutForm) {
+        workoutForm.addEventListener('submit', handleWorkoutFormSubmit);
+    }
+
+    const muscleAreaSelect = document.getElementById('muscle-area');
+    if (muscleAreaSelect) {
+        muscleAreaSelect.addEventListener('change', updateWorkoutDropdown);
+    }
+
     // Form submission
     const form = document.getElementById('fitness-form');
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
             console.log('Form submitted');
             handleFormSubmit(e);
         });
     }
-    
+
     // Cancel edit button
     const cancelBtn = document.getElementById('cancel-edit');
     if (cancelBtn) {
@@ -152,13 +220,13 @@ function setupEventListeners() {
             cancelEdit();
         });
     }
-    
+
     // Search functionality
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.addEventListener('input', handleSearch);
     }
-    
+
     const clearSearchBtn = document.getElementById('clear-search');
     if (clearSearchBtn) {
         clearSearchBtn.addEventListener('click', (e) => {
@@ -166,7 +234,7 @@ function setupEventListeners() {
             clearSearch();
         });
     }
-    
+
     // Data management
     const exportBtn = document.getElementById('export-data');
     if (exportBtn) {
@@ -175,59 +243,59 @@ function setupEventListeners() {
             exportData();
         });
     }
-    
+
     const importInput = document.getElementById('import-data');
     if (importInput) {
         importInput.addEventListener('change', importData);
     }
-    
+
     // Calendar navigation
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
-    
+
     if (prevBtn) {
         prevBtn.addEventListener('click', (e) => {
             e.preventDefault();
             navigateMonth(-1);
         });
     }
-    
+
     if (nextBtn) {
         nextBtn.addEventListener('click', (e) => {
             e.preventDefault();
             navigateMonth(1);
         });
     }
-    
+
     console.log('All event listeners attached successfully');
 }
 
 function showView(viewName) {
     console.log('Showing view:', viewName);
-    
+
     // Hide all views first
     const allViews = document.querySelectorAll('.view');
     allViews.forEach(view => {
         view.classList.remove('active');
         console.log('Hiding view:', view.id);
     });
-    
+
     // Show the target view
     const targetView = document.getElementById(`${viewName}-view`);
     if (targetView) {
         targetView.classList.add('active');
         console.log('Showing view:', targetView.id);
-        
+
         // If switching to table view, update the table
         if (viewName === 'table') {
             setTimeout(() => updateTable(), 100);
         }
-        
+
         // If switching to dashboard, update charts
         if (viewName === 'dashboard') {
             setTimeout(() => updateDashboard(), 200);
         }
-        
+
     } else {
         console.error('Target view not found:', `${viewName}-view`);
     }
@@ -238,7 +306,7 @@ function setActiveNav(viewName) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Add active class to current nav button
     const activeBtn = document.querySelector(`[data-view="${viewName}"]`);
     if (activeBtn) {
@@ -250,11 +318,11 @@ function setActiveNav(viewName) {
 function handleFormSubmit(e) {
     e.preventDefault();
     console.log('Processing form submission...');
-    
+
     try {
         const formData = collectFormData();
         console.log('Form data collected:', formData);
-        
+
         if (currentEditId) {
             updateEntry(currentEditId, formData);
             console.log('Entry updated');
@@ -262,25 +330,25 @@ function handleFormSubmit(e) {
             addEntry(formData);
             console.log('Entry added');
         }
-        
+
         // Immediately export the data after a new entry is saved or updated
         exportData();
-        
+
         // Show success message
         showStatusMessage('Entry saved successfully!', 'success');
-        
+
         // Reset form
         resetForm();
-        
+
         // Update table data
         updateTable();
-        
+
         // Switch to table view to show the saved entry
         setTimeout(() => {
             showView('table');
             setActiveNav('table');
         }, 500);
-        
+
     } catch (error) {
         console.error('Error submitting form:', error);
         showStatusMessage('Error saving entry. Please try again.', 'error');
@@ -343,16 +411,66 @@ function deleteEntry(id) {
     if (confirm('Are you sure you want to delete this entry?')) {
         const initialLength = fitnessData.length;
         fitnessData = fitnessData.filter(entry => entry.id !== id);
-        
+
         if (fitnessData.length < initialLength) {
             // Call the save function after deleting an entry
             saveDataToFile();
-            
+
             updateTable();
             showStatusMessage('Entry deleted successfully!', 'success');
             console.log('Entry deleted. Remaining entries:', fitnessData.length);
         }
     }
+}
+
+function updateWorkoutDropdown() {
+    const muscleArea = document.getElementById('muscle-area').value;
+    const workoutSelect = document.getElementById('workout-type');
+    workoutSelect.innerHTML = '<option value="">Select workout</option>'; // Reset dropdown
+
+    if (muscleArea && workouts[muscleArea]) {
+        workouts[muscleArea].forEach(workout => {
+            const option = document.createElement('option');
+            option.value = workout;
+            option.textContent = workout;
+            workoutSelect.appendChild(option);
+        });
+    }
+}
+
+function handleWorkoutFormSubmit(e) {
+    e.preventDefault();
+    console.log('Processing workout form submission...');
+
+    const date = document.getElementById('workout-date').value;
+    const muscleArea = document.getElementById('muscle-area').value;
+    const workoutType = document.getElementById('workout-type').value;
+    const weight = parseFloat(document.getElementById('workout-weight').value) || null;
+
+    if (!date || !muscleArea || !workoutType) {
+        showStatusMessage('Please fill out all required fields.', 'error');
+        return;
+    }
+
+    // You'll need to decide where to store this data. For now, let's just log it.
+    // A good approach would be to add it to the fitnessData array in a new format.
+    const workoutEntry = {
+        id: generateId(),
+        date: date,
+        type: 'workout', // Differentiate from other entries
+        muscleArea: muscleArea,
+        workoutType: workoutType,
+        weight: weight
+    };
+
+    // You can add this entry to a separate array or the existing fitnessData array
+    // and then save/export it. For example:
+    fitnessData.push(workoutEntry);
+    sortDataByDate();
+    exportData(); // Export the updated data
+
+    showStatusMessage('Workout saved successfully!', 'success');
+    document.getElementById('workout-form').reset();
 }
 
 function sortDataByDate() {
@@ -364,22 +482,22 @@ function resetForm() {
     if (form) {
         form.reset();
     }
-    
+
     const dateInput = document.getElementById('entry-date');
     if (dateInput) {
         dateInput.valueAsDate = new Date();
     }
-    
+
     const formTitle = document.getElementById('form-title');
     if (formTitle) {
         formTitle.textContent = 'Add New Entry';
     }
-    
+
     const cancelBtn = document.getElementById('cancel-edit');
     if (cancelBtn) {
         cancelBtn.classList.add('hidden');
     }
-    
+
     currentEditId = null;
     console.log('Form reset');
 }
@@ -391,9 +509,9 @@ function editEntry(id) {
         console.error('Entry not found:', id);
         return;
     }
-    
+
     currentEditId = id;
-    
+
     // Populate form fields
     setFieldValue('entry-date', entry.date);
     setFieldValue('weight', entry.weight);
@@ -414,18 +532,18 @@ function editEntry(id) {
     setFieldValue('energy-mood', entry.energyMood);
     setFieldValue('sleep-quality', entry.sleepQuality);
     setFieldValue('sleep-duration', entry.sleepDuration);
-    
+
     // Update form UI
     const formTitle = document.getElementById('form-title');
     if (formTitle) {
         formTitle.textContent = 'Edit Entry';
     }
-    
+
     const cancelBtn = document.getElementById('cancel-edit');
     if (cancelBtn) {
         cancelBtn.classList.remove('hidden');
     }
-    
+
     // Switch to form view
     showView('form');
     setActiveNav('form');
@@ -445,15 +563,15 @@ function cancelEdit() {
 
 function updateTable() {
     console.log('Updating table with', fitnessData.length, 'entries');
-    
+
     const tbody = document.getElementById('table-body');
     const noDataDiv = document.getElementById('no-data');
-    
+
     if (!tbody) {
         console.error('Table body not found');
         return;
     }
-    
+
     if (fitnessData.length === 0) {
         tbody.innerHTML = '';
         if (noDataDiv) {
@@ -461,11 +579,11 @@ function updateTable() {
         }
         return;
     }
-    
+
     if (noDataDiv) {
         noDataDiv.classList.add('hidden');
     }
-    
+
     const tableHTML = fitnessData.map(entry => `
         <tr>
             <td>${formatDate(entry.date)}</td>
@@ -480,7 +598,7 @@ function updateTable() {
             </td>
         </tr>
     `).join('');
-    
+
     tbody.innerHTML = tableHTML;
     console.log('Table updated successfully');
 }
@@ -488,7 +606,7 @@ function updateTable() {
 function handleSearch(e) {
     const searchTerm = e.target.value.toLowerCase();
     const rows = document.querySelectorAll('#table-body tr');
-    
+
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(searchTerm) ? '' : 'none';
@@ -500,7 +618,7 @@ function clearSearch() {
     if (searchInput) {
         searchInput.value = '';
     }
-    
+
     document.querySelectorAll('#table-body tr').forEach(row => {
         row.style.display = '';
     });
@@ -515,32 +633,35 @@ function updateDashboard() {
 
 function updateMetrics() {
     console.log('Updating metrics...');
-    
-    // Total workouts
-    const totalWorkouts = fitnessData.reduce((sum, entry) => sum + (entry.workoutSessions || 0), 0);
-    const totalWorkoutsEl = document.getElementById('total-workouts');
-    if (totalWorkoutsEl) {
-        totalWorkoutsEl.textContent = totalWorkouts;
+
+    // Filter data for the current month and year
+    const currentMonthData = fitnessData.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear;
+    });
+
+    // Total workouts this month
+    const totalWorkoutsMonth = currentMonthData.reduce((sum, entry) => sum + (entry.workoutSessions || 0), 0);
+    const totalWorkoutsMonthEl = document.getElementById('total-workouts-month');
+    if (totalWorkoutsMonthEl) {
+        totalWorkoutsMonthEl.textContent = totalWorkoutsMonth;
     }
-    
-    // Average steps
-    const entriesWithSteps = fitnessData.filter(entry => entry.steps && entry.steps > 0);
-    const avgSteps = entriesWithSteps.length > 0 
-        ? Math.round(entriesWithSteps.reduce((sum, entry) => sum + entry.steps, 0) / entriesWithSteps.length)
-        : 0;
-    const avgStepsEl = document.getElementById('avg-steps');
-    if (avgStepsEl) {
-        avgStepsEl.textContent = avgSteps.toLocaleString();
+
+    // Total steps this month
+    const totalStepsMonth = currentMonthData.reduce((sum, entry) => sum + (entry.steps || 0), 0);
+    const totalStepsMonthEl = document.getElementById('total-steps-month');
+    if (totalStepsMonthEl) {
+        totalStepsMonthEl.textContent = totalStepsMonth.toLocaleString();
     }
-    
-    // Workout streak
+
+    // Workout streak (calculation remains the same)
     const streak = calculateWorkoutStreak();
     const streakEl = document.getElementById('workout-streak');
     if (streakEl) {
         streakEl.textContent = `${streak} day${streak !== 1 ? 's' : ''}`;
     }
-    
-    // Last period
+
+    // Last period (calculation remains the same)
     const lastPeriod = findLastPeriod();
     const lastPeriodEl = document.getElementById('last-period');
     if (lastPeriodEl) {
@@ -550,25 +671,25 @@ function updateMetrics() {
 
 function calculateWorkoutStreak() {
     if (fitnessData.length === 0) return 0;
-    
+
     const sortedData = [...fitnessData].sort((a, b) => new Date(b.date) - new Date(a.date));
     let streak = 0;
     let currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
-    
+
     for (let i = 0; i < 365; i++) {
         const dateString = currentDate.toISOString().split('T')[0];
         const entry = sortedData.find(e => e.date === dateString);
-        
+
         if (entry && entry.workoutSessions > 0) {
             streak++;
         } else if (i > 0) {
             break;
         }
-        
+
         currentDate.setDate(currentDate.getDate() - 1);
     }
-    
+
     return streak;
 }
 
@@ -576,7 +697,7 @@ function findLastPeriod() {
     const periodsWithDates = fitnessData
         .filter(entry => entry.menstrualCycle && entry.menstrualCycle.trim())
         .sort((a, b) => new Date(b.menstrualCycle) - new Date(a.menstrualCycle));
-    
+
     return periodsWithDates.length > 0 ? periodsWithDates[0].menstrualCycle : null;
 }
 
@@ -598,12 +719,12 @@ function updateStepsChart() {
         console.warn('Steps chart canvas not found');
         return;
     }
-    
+
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js not loaded');
         return;
     }
-    
+
     const ctx = canvas.getContext('2d');
     const last30Days = getLast30DaysData();
     const stepsData = last30Days.map(entry => entry ? (entry.steps || 0) : 0);
@@ -612,11 +733,11 @@ function updateStepsChart() {
         date.setDate(date.getDate() - (29 - index));
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
-    
+
     if (stepsChart) {
         stepsChart.destroy();
     }
-    
+
     stepsChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -642,7 +763,7 @@ function updateStepsChart() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString();
                         }
                     }
@@ -650,7 +771,7 @@ function updateStepsChart() {
             }
         }
     });
-    
+
     console.log('Steps chart updated');
 }
 
@@ -660,25 +781,25 @@ function updateWeightChart() {
         console.warn('Weight chart canvas not found');
         return;
     }
-    
+
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js not loaded');
         return;
     }
-    
+
     const ctx = canvas.getContext('2d');
     const weightEntries = fitnessData
         .filter(entry => entry.weight && entry.weight > 0)
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(-30);
-    
+
     const weightData = weightEntries.map(entry => entry.weight);
     const labels = weightEntries.map(entry => formatDate(entry.date));
-    
+
     if (weightChart) {
         weightChart.destroy();
     }
-    
+
     weightChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -707,75 +828,75 @@ function updateWeightChart() {
             }
         }
     });
-    
+
     console.log('Weight chart updated');
 }
 
 function getLast30DaysData() {
     const result = [];
     const today = new Date();
-    
+
     for (let i = 29; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         const dateString = date.toISOString().split('T')[0];
-        
+
         const entry = fitnessData.find(e => e.date === dateString);
         result.push(entry || null);
     }
-    
+
     return result;
 }
 
 function updateHeatmapCalendar() {
     const calendar = document.getElementById('heatmap-calendar');
     const monthYearSpan = document.getElementById('current-month-year');
-    
+
     if (!calendar) {
         console.warn('Heatmap calendar not found');
         return;
     }
-    
+
     const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    
+
     if (monthYearSpan) {
         monthYearSpan.textContent = `${monthNames[currentMonth]} ${currentYear}`;
     }
-    
+
     const firstDay = new Date(currentYear, currentMonth, 1);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
-    
+
     const daysInCalendar = 42;
     const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     let calendarHTML = '';
-    
+
     dayHeaders.forEach(day => {
         calendarHTML += `<div class="calendar-day calendar-day-header">${day}</div>`;
     });
-    
+
     for (let i = 0; i < daysInCalendar; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
-        
+
         const isCurrentMonth = currentDate.getMonth() === currentMonth;
         const dateString = currentDate.toISOString().split('T')[0];
         const entry = fitnessData.find(e => e.date === dateString);
-        
+
         const workouts = entry ? (entry.workoutSessions || 0) : 0;
         const level = Math.min(workouts, 4);
-        
+
         const classes = [
             'calendar-day',
             isCurrentMonth ? '' : 'other-month'
         ].filter(Boolean).join(' ');
-        
+
         const tooltip = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]}: ${workouts} workout${workouts !== 1 ? 's' : ''}`;
-        
+
         calendarHTML += `
             <div class="${classes}" 
                  data-level="${level}" 
@@ -784,14 +905,14 @@ function updateHeatmapCalendar() {
             </div>
         `;
     }
-    
+
     calendar.innerHTML = calendarHTML;
     console.log('Heatmap calendar updated');
 }
 
 function navigateMonth(direction) {
     currentMonth += direction;
-    
+
     if (currentMonth > 11) {
         currentMonth = 0;
         currentYear++;
@@ -799,7 +920,7 @@ function navigateMonth(direction) {
         currentMonth = 11;
         currentYear--;
     }
-    
+
     updateHeatmapCalendar();
 }
 
@@ -807,12 +928,12 @@ function exportData() {
     try {
         const dataStr = JSON.stringify(fitnessData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        
+
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
         link.download = `fitness-data-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
-        
+
         showStatusMessage('Data exported successfully!', 'success');
         console.log('Data exported');
     } catch (error) {
@@ -824,26 +945,26 @@ function exportData() {
 function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         try {
             const importedData = JSON.parse(event.target.result);
-            
+
             if (!Array.isArray(importedData)) {
                 throw new Error('Invalid data format - expected array');
             }
-            
+
             let merged = 0;
             let added = 0;
-            
+
             importedData.forEach(entry => {
                 if (!entry.date) return;
-                
-                const existingIndex = fitnessData.findIndex(existing => 
+
+                const existingIndex = fitnessData.findIndex(existing =>
                     existing.date === entry.date
                 );
-                
+
                 if (existingIndex !== -1) {
                     fitnessData[existingIndex] = { ...entry, id: fitnessData[existingIndex].id };
                     merged++;
@@ -852,20 +973,20 @@ function importData(e) {
                     added++;
                 }
             });
-            
+
             sortDataByDate();
             updateTable();
             updateDashboard();
-            
+
             showStatusMessage(`Data imported! Added ${added} new entries, merged ${merged} existing entries.`, 'success');
             console.log('Data imported:', { added, merged });
-            
+
         } catch (error) {
             console.error('Import error:', error);
             showStatusMessage('Error importing data: Invalid file format', 'error');
         }
     };
-    
+
     reader.readAsText(file);
     e.target.value = '';
 }
@@ -873,15 +994,15 @@ function importData(e) {
 function showStatusMessage(message, type = 'success') {
     const statusEl = document.getElementById('status-message');
     if (!statusEl) return;
-    
+
     statusEl.textContent = message;
     statusEl.className = `status-message ${type}`;
     statusEl.classList.remove('hidden');
-    
+
     setTimeout(() => {
         statusEl.classList.add('hidden');
     }, 5000);
-    
+
     console.log('Status message:', message, type);
 }
 
@@ -903,17 +1024,17 @@ function saveDataToFile() {
     try {
         const dataStr = JSON.stringify(fitnessData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        
+
         // This creates a link to download the data immediately
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
         link.download = `fitness-data.json`;
-        
+
         // To save without user interaction, you'd need a server-side component.
         // For a client-side solution, this approach requires the user to save the file.
         // You can uncomment the line below to auto-download, but it might be intrusive.
         // link.click();
-        
+
         console.log('Data prepared for saving');
     } catch (error) {
         console.error('Save error:', error);
