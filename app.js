@@ -376,7 +376,7 @@ function collectFormData() {
     return {
         id: currentEditId || generateId(),
         date: getFieldValue('entry-date'),
-        weight: parseFloat(getFieldValue('weight')) || null,
+        weight: parseFloat(getFieldValue('weight')) || null, // This is the person's weight
         measurements: {
             waist: parseFloat(getFieldValue('waist')) || null,
             hips: parseFloat(getFieldValue('hips')) || null,
@@ -462,29 +462,25 @@ function handleWorkoutFormSubmit(e) {
     const date = document.getElementById('workout-date').value;
     const muscleArea = document.getElementById('muscle-area').value;
     const workoutType = document.getElementById('workout-type').value;
-    const weight = parseFloat(document.getElementById('workout-weight').value) || null;
+    const equipmentWeight = parseFloat(document.getElementById('workout-weight').value) || null; // Use a new variable name
 
     if (!date || !muscleArea || !workoutType) {
         showStatusMessage('Please fill out all required fields.', 'error');
         return;
     }
 
-    // You'll need to decide where to store this data. For now, let's just log it.
-    // A good approach would be to add it to the fitnessData array in a new format.
     const workoutEntry = {
         id: generateId(),
         date: date,
-        type: 'workout', // Differentiate from other entries
+        type: 'workout',
         muscleArea: muscleArea,
         workoutType: workoutType,
-        weight: weight
+        equipmentWeight: equipmentWeight // Store equipment weight here
     };
 
-    // You can add this entry to a separate array or the existing fitnessData array
-    // and then save/export it. For example:
     fitnessData.push(workoutEntry);
     sortDataByDate();
-    exportData(); // Export the updated data
+    exportData();
 
     showStatusMessage('Workout saved successfully!', 'success');
     document.getElementById('workout-form').reset();
@@ -601,20 +597,34 @@ function updateTable() {
         noDataDiv.classList.add('hidden');
     }
 
-    const tableHTML = fitnessData.map(entry => `
-        <tr>
-            <td>${formatDate(entry.date)}</td>
-            <td>${entry.weight ? entry.weight + ' kg' : '-'}</td>
-            <td>${entry.calories || '-'}</td>
-            <td>${entry.workoutSessions || 0}</td>
-            <td>${entry.steps ? entry.steps.toLocaleString() : '-'}</td>
-            <td>${entry.sleepDuration ? entry.sleepDuration + 'h' : '-'} (${entry.sleepQuality || '-'})</td>
-            <td class="table-actions">
-                <button class="btn btn--sm btn--edit" onclick="editEntry('${entry.id}')">Edit</button>
-                <button class="btn btn--sm btn--delete" onclick="deleteEntry('${entry.id}')">Delete</button>
-            </td>
-        </tr>
-    `).join('');
+    const tableHTML = fitnessData.map(entry => {
+        if (entry.type === 'workout') {
+            return `
+                <tr>
+                    <td>${formatDate(entry.date)}</td>
+                    <td>-</td> <td>-</td> <td>1 (${entry.workoutType})</td> <td>-</td> <td>-</td> <td class="table-actions">
+                        <button class="btn btn--sm btn--edit" onclick="editEntry('${entry.id}')">Edit</button>
+                        <button class="btn btn--sm btn--delete" onclick="deleteEntry('${entry.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        } else {
+            return `
+                <tr>
+                    <td>${formatDate(entry.date)}</td>
+                    <td>${entry.weight ? entry.weight + ' kg' : '-'}</td>
+                    <td>${entry.calories || '-'}</td>
+                    <td>${entry.workoutSessions || 0}</td>
+                    <td>${entry.steps ? entry.steps.toLocaleString() : '-'}</td>
+                    <td>${entry.sleepDuration ? entry.sleepDuration + 'h' : '-'} (${entry.sleepQuality || '-'})</td>
+                    <td class="table-actions">
+                        <button class="btn btn--sm btn--edit" onclick="editEntry('${entry.id}')">Edit</button>
+                        <button class="btn btn--sm btn--delete" onclick="deleteEntry('${entry.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        }
+    }).join('');
 
     tbody.innerHTML = tableHTML;
     console.log('Table updated successfully');
@@ -1206,7 +1216,7 @@ function updateFitnessSummary() {
     `;
 
     dailyWorkouts.forEach(workout => {
-        const weight = workout.weight ? `${workout.weight} kg` : 'N/A';
+        const weight = workout.equipmentWeight ? `${workout.equipmentWeight} kg` : 'N/A';
         summaryHTML += `
             <li>
                 <strong>${workout.workoutType}</strong>: ${weight}
