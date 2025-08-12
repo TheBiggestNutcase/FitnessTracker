@@ -702,6 +702,16 @@ function findLastPeriod() {
     return periodsWithDates.length > 0 ? periodsWithDates[0].menstrualCycle : null;
 }
 
+function getDaysInMonth(year, month) {
+    const date = new Date(year, month, 1);
+    const dates = [];
+    while (date.getMonth() === month) {
+        dates.push(new Date(date));
+        date.setDate(date.getDate() + 1);
+    }
+    return dates;
+}
+
 function updateCharts() {
     console.log('Updating charts...');
     setTimeout(() => {
@@ -728,13 +738,16 @@ function updateStepsChart() {
     }
 
     const ctx = canvas.getContext('2d');
-    const last30Days = getLast30DaysData();
-    const stepsData = last30Days.map(entry => entry ? (entry.steps || 0) : 0);
-    const labels = last30Days.map((entry, index) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (29 - index));
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // Filter data for the current month
+    const monthDays = getDaysInMonth(currentYear, currentMonth);
+    const monthlyData = monthDays.map(date => {
+        const dateString = date.toISOString().split('T')[0];
+        const entry = fitnessData.find(e => e.date === dateString);
+        return entry ? (entry.steps || 0) : null;
     });
+
+    const labels = monthDays.map(date => date.toLocaleDateString('en-US', { day: 'numeric' }));
 
     if (stepsChart) {
         stepsChart.destroy();
@@ -746,7 +759,7 @@ function updateStepsChart() {
             labels: labels,
             datasets: [{
                 label: 'Daily Steps',
-                data: stepsData,
+                data: monthlyData,
                 borderColor: '#1FB8CD',
                 backgroundColor: 'rgba(31, 184, 205, 0.1)',
                 fill: true,
@@ -765,7 +778,7 @@ function updateStepsChart() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function (value) {
+                        callback: function(value) {
                             return value.toLocaleString();
                         }
                     }
@@ -773,8 +786,7 @@ function updateStepsChart() {
             }
         }
     });
-
-    console.log('Steps chart updated');
+    console.log('Steps chart updated for current month');
 }
 
 function updateWeightChart() {
@@ -1047,26 +1059,26 @@ function exportData() {
 function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
-
+    
     const reader = new FileReader();
-    reader.onload = function (event) {
+    reader.onload = function(event) {
         try {
             const importedData = JSON.parse(event.target.result);
-
+            
             if (!Array.isArray(importedData)) {
                 throw new Error('Invalid data format - expected array');
             }
-
+            
             let merged = 0;
             let added = 0;
-
+            
             importedData.forEach(entry => {
                 if (!entry.date) return;
-
-                const existingIndex = fitnessData.findIndex(existing =>
+                
+                const existingIndex = fitnessData.findIndex(existing => 
                     existing.date === entry.date
                 );
-
+                
                 if (existingIndex !== -1) {
                     fitnessData[existingIndex] = { ...entry, id: fitnessData[existingIndex].id };
                     merged++;
@@ -1075,20 +1087,21 @@ function importData(e) {
                     added++;
                 }
             });
-
+            
             sortDataByDate();
             updateTable();
+            
             updateDashboard();
-
+            
             showStatusMessage(`Data imported! Added ${added} new entries, merged ${merged} existing entries.`, 'success');
             console.log('Data imported:', { added, merged });
-
+            
         } catch (error) {
             console.error('Import error:', error);
             showStatusMessage('Error importing data: Invalid file format', 'error');
         }
     };
-
+    
     reader.readAsText(file);
     e.target.value = '';
 }
