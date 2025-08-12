@@ -263,6 +263,9 @@ function handleFormSubmit(e) {
             console.log('Entry added');
         }
         
+        // Immediately export the data after a new entry is saved or updated
+        exportData();
+        
         // Show success message
         showStatusMessage('Entry saved successfully!', 'success');
         
@@ -342,6 +345,9 @@ function deleteEntry(id) {
         fitnessData = fitnessData.filter(entry => entry.id !== id);
         
         if (fitnessData.length < initialLength) {
+            // Call the save function after deleting an entry
+            saveDataToFile();
+            
             updateTable();
             showStatusMessage('Entry deleted successfully!', 'success');
             console.log('Entry deleted. Remaining entries:', fitnessData.length);
@@ -890,6 +896,27 @@ function formatDate(dateString) {
         });
     } catch (error) {
         return dateString;
+    }
+}
+// Add this new function to handle saving the data
+function saveDataToFile() {
+    try {
+        const dataStr = JSON.stringify(fitnessData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        // This creates a link to download the data immediately
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `fitness-data.json`;
+        
+        // To save without user interaction, you'd need a server-side component.
+        // For a client-side solution, this approach requires the user to save the file.
+        // You can uncomment the line below to auto-download, but it might be intrusive.
+        // link.click();
+        
+        console.log('Data prepared for saving');
+    } catch (error) {
+        console.error('Save error:', error);
     }
 }
 
