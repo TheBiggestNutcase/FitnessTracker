@@ -1281,6 +1281,7 @@ function handleCycleFormSubmit(e) {
     console.log('Processing period form submission...');
 
     const date = document.getElementById('period-date').value;
+    const flowRate = document.getElementById('flow-rate').value;
 
     if (!date) {
         showStatusMessage('Please select a date.', 'error');
@@ -1290,7 +1291,8 @@ function handleCycleFormSubmit(e) {
     const periodEntry = {
         id: generateId(),
         date: date,
-        type: 'period'
+        type: 'period',
+        flowRate: flowRate
     };
 
     const existingEntry = fitnessData.find(e => e.date === date && e.type === 'period');
@@ -1332,7 +1334,7 @@ function updateCycleStats() {
 
         for (let i = 1; i < periodEntries.length; i++) {
             const currentPeriodDay = new Date(periodEntries[i].date);
-            const previousPeriodDay = new Date(periodEntries[i-1].date);
+            const previousPeriodDay = new Date(periodEntries[i - 1].date);
 
             const diffInDays = (currentPeriodDay - previousPeriodDay) / (1000 * 60 * 60 * 24);
 
@@ -1357,9 +1359,9 @@ function updateCycleStats() {
 
     if (periodEntries.length > 0) {
         // Logic to find last cycle start and end dates
-        let lastEntryDate = new Date(periodEntries[periodEntries.length-1].date);
+        let lastEntryDate = new Date(periodEntries[periodEntries.length - 1].date);
         let lastPeriodStart = new Date(lastEntryDate);
-        while(periodEntries.some(e => new Date(e.date).getTime() === lastPeriodStart.getTime() - (24 * 60 * 60 * 1000))) {
+        while (periodEntries.some(e => new Date(e.date).getTime() === lastPeriodStart.getTime() - (24 * 60 * 60 * 1000))) {
             lastPeriodStart.setDate(lastPeriodStart.getDate() - 1);
         }
 
@@ -1388,10 +1390,10 @@ function renderCycleHeatmap() {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     monthYearSpan.textContent = `${monthNames[currentCycleMonth]} ${currentCycleYear}`;
 
-    const periodDays = new Set(
+    const periodDays = new Map(
         fitnessData
             .filter(entry => entry.type === 'period')
-            .map(entry => entry.date)
+            .map(entry => [entry.date, entry.flowRate])
     );
 
     const firstDay = new Date(currentCycleYear, currentCycleMonth, 1);
@@ -1412,7 +1414,8 @@ function renderCycleHeatmap() {
 
         const isCurrentMonth = currentDate.getMonth() === currentCycleMonth;
         const dateString = currentDate.toISOString().split('T')[0];
-        const isPeriodDay = periodDays.has(dateString);
+        const flowRate = periodDays.get(dateString);
+        const isPeriodDay = !!flowRate;
 
         const classes = [
             'calendar-day',
@@ -1420,7 +1423,7 @@ function renderCycleHeatmap() {
             isPeriodDay ? 'period-day' : ''
         ].filter(Boolean).join(' ');
 
-        const tooltip = isPeriodDay ? 'Period day' : 'No period';
+        const tooltip = isPeriodDay ? `Period day: ${flowRate}` : 'No period';
 
         calendarHTML += `
             <div class="${classes}" 
