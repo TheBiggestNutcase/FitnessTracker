@@ -1000,6 +1000,14 @@ select.form-control {
   max-width: 100%;
 }
 
+#heatmap-calendar, #cycle-heatmap-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-20) auto; /* Centers the calendar */
+  max-width: 600px; /* Limits the maximum width */
+}
+
 #cycle-heatmap-calendar .calendar-day {
   background-color: var(--color-bg-1);
   color: var(--color-text);
@@ -1031,12 +1039,13 @@ select.form-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-standard);
   border: 1px solid transparent;
   position: relative;
+  padding: var(--space-4);
 }
 
 .calendar-day:hover {
@@ -1220,6 +1229,11 @@ select.form-control {
 
   .calendar-controls {
     justify-content: center;
+  }
+  
+  .calendar-day {
+    font-size: 10px;
+    padding: var(--space-2);
   }
 
   #heatmap-calendar {
