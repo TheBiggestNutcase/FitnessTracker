@@ -3,7 +3,9 @@ let fitnessData = [];
 let currentEditId = null;
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
-let selectedSummaryDate = null; // Add this new variable
+let selectedSummaryDate = null;
+let currentCycleMonth = new Date().getMonth();
+let currentCycleYear = new Date().getFullYear();
 
 // Chart instances
 let stepsChart = null;
@@ -228,6 +230,29 @@ function setupEventListeners() {
         }
     });
 
+    // Add this new listener for the cycle form
+    const cycleForm = document.getElementById('cycle-form');
+    if (cycleForm) {
+        cycleForm.addEventListener('submit', handleCycleFormSubmit);
+    }
+
+    // Add these new listeners for the cycle calendar navigation
+    const prevCycleBtn = document.getElementById('prev-cycle-month');
+    const nextCycleBtn = document.getElementById('next-cycle-month');
+
+    if (prevCycleBtn) {
+        prevCycleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateCycleMonth(-1);
+        });
+    }
+
+    if (nextCycleBtn) {
+        nextCycleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateCycleMonth(1);
+        });
+    }
 
     // Cancel edit button
     const cancelBtn = document.getElementById('cancel-edit');
@@ -312,6 +337,17 @@ function showView(viewName) {
         if (viewName === 'dashboard') {
             setTimeout(() => updateDashboard(), 200);
         }
+        if (targetView) {
+            targetView.classList.add('active');
+
+            if (viewName === 'table') {
+                updateTable();
+            } else if (viewName === 'dashboard') {
+                updateDashboard();
+            } else if (viewName === 'cycle') {
+                updateCycleDashboard(); // This is a new function call
+            }
+        }
 
     } else {
         console.error('Target view not found:', `${viewName}-view`);
@@ -319,9 +355,18 @@ function showView(viewName) {
 }
 
 function setActiveNav(viewName) {
-    // Remove active class from all nav buttons
+
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
+    });
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const viewName = e.target.getAttribute('data-view');
+            showView(viewName);
+            setActiveNav(viewName);
+        });
     });
 
     // Add active class to current nav button
@@ -991,6 +1036,9 @@ function getLast30DaysData() {
 function updateHeatmapCalendar() {
     const calendar = document.getElementById('heatmap-calendar');
     const monthYearSpan = document.getElementById('current-month-year');
+    const entry = fitnessData.find(e => e.date === dateString);
+    const workouts = entry && entry.type === 'fitness' ? (entry.workoutSessions || 0) : 0;
+    const level = Math.min(workouts, 4);
 
     if (!calendar) {
         console.warn('Heatmap calendar not found');
@@ -1226,6 +1274,179 @@ function updateFitnessSummary() {
 
     summaryHTML += '</ul>';
     summaryContent.innerHTML = summaryHTML;
+}
+
+function handleCycleFormSubmit(e) {
+    e.preventDefault();
+    console.log('Processing period form submission...');
+
+    const date = document.getElementById('period-date').value;
+
+    if (!date) {
+        showStatusMessage('Please select a date.', 'error');
+        return;
+    }
+
+    const periodEntry = {
+        id: generateId(),
+        date: date,
+        type: 'period'
+    };
+
+    const existingEntry = fitnessData.find(e => e.date === date && e.type === 'period');
+    if (existingEntry) {
+        showStatusMessage('A period entry already exists for this date.', 'warning');
+        return;
+    }
+
+    fitnessData.push(periodEntry);
+    sortDataByDate();
+    exportData();
+
+    showStatusMessage('Period day saved successfully!', 'success');
+    document.getElementById('cycle-form').reset();
+    updateCycleDashboard();
+}
+
+// Updates the cycle tracker dashboard
+function updateCycleDashboard() {
+    console.log('Updating cycle dashboard...');
+    updateCycleStats();
+    renderCycleHeatmap();
+}
+
+// Calculates and displays cycle stats
+function updateCycleStats() {
+    const periodEntries = fitnessData
+        .filter(entry => entry.type === 'period')
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const cycleStartEl = document.getElementById('cycle-start-date');
+    const cycleEndEl = document.getElementById('cycle-end-date');
+    const cycleLengthEl = document.getElementById('cycle-length');
+
+    const cycles = [];
+    if (periodEntries.length > 0) {
+        let currentCycleStart = new Date(periodEntries[0].date);
+        let currentCycleEnd = null;
+
+        for (let i = 1; i < periodEntries.length; i++) {
+            const currentPeriodDay = new Date(periodEntries[i].date);
+            const previousPeriodDay = new Date(periodEntries[i-1].date);
+
+            const diffInDays = (currentPeriodDay - previousPeriodDay) / (1000 * 60 * 60 * 24);
+
+            if (diffInDays > 2) { // Assuming a break of more than 2 days is a new cycle
+                currentCycleEnd = previousPeriodDay;
+                cycles.push({
+                    start: currentCycleStart,
+                    end: currentCycleEnd,
+                    length: (currentCycleEnd - currentCycleStart) / (1000 * 60 * 60 * 24) + 1
+                });
+                currentCycleStart = currentPeriodDay;
+            } else if (i === periodEntries.length - 1) {
+                currentCycleEnd = currentPeriodDay;
+                cycles.push({
+                    start: currentCycleStart,
+                    end: currentCycleEnd,
+                    length: (currentCycleEnd - currentCycleStart) / (1000 * 60 * 60 * 24) + 1
+                });
+            }
+        }
+    }
+
+    if (periodEntries.length > 0) {
+        // Logic to find last cycle start and end dates
+        let lastEntryDate = new Date(periodEntries[periodEntries.length-1].date);
+        let lastPeriodStart = new Date(lastEntryDate);
+        while(periodEntries.some(e => new Date(e.date).getTime() === lastPeriodStart.getTime() - (24 * 60 * 60 * 1000))) {
+            lastPeriodStart.setDate(lastPeriodStart.getDate() - 1);
+        }
+
+        cycleStartEl.textContent = formatDate(lastPeriodStart.toISOString().split('T')[0]);
+        cycleEndEl.textContent = formatDate(lastEntryDate.toISOString().split('T')[0]);
+    } else {
+        cycleStartEl.textContent = 'Not recorded';
+        cycleEndEl.textContent = 'Not recorded';
+    }
+
+    if (cycles.length > 0) {
+        const totalLength = cycles.reduce((sum, cycle) => sum + cycle.length, 0);
+        const averageLength = totalLength / cycles.length;
+        cycleLengthEl.textContent = `${averageLength.toFixed(0)} days`;
+    } else {
+        cycleLengthEl.textContent = 'N/A';
+    }
+}
+
+// Renders the new period calendar
+function renderCycleHeatmap() {
+    const calendar = document.getElementById('cycle-heatmap-calendar');
+    const monthYearSpan = document.getElementById('current-cycle-month-year');
+    if (!calendar) return;
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    monthYearSpan.textContent = `${monthNames[currentCycleMonth]} ${currentCycleYear}`;
+
+    const periodDays = new Set(
+        fitnessData
+            .filter(entry => entry.type === 'period')
+            .map(entry => entry.date)
+    );
+
+    const firstDay = new Date(currentCycleYear, currentCycleMonth, 1);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    const daysInCalendar = 42;
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    let calendarHTML = '';
+    dayHeaders.forEach(day => {
+        calendarHTML += `<div class="calendar-day calendar-day-header">${day}</div>`;
+    });
+
+    for (let i = 0; i < daysInCalendar; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+
+        const isCurrentMonth = currentDate.getMonth() === currentCycleMonth;
+        const dateString = currentDate.toISOString().split('T')[0];
+        const isPeriodDay = periodDays.has(dateString);
+
+        const classes = [
+            'calendar-day',
+            isCurrentMonth ? '' : 'other-month',
+            isPeriodDay ? 'period-day' : ''
+        ].filter(Boolean).join(' ');
+
+        const tooltip = isPeriodDay ? 'Period day' : 'No period';
+
+        calendarHTML += `
+            <div class="${classes}" 
+                 data-tooltip="${tooltip}"
+                 data-date="${dateString}">
+                ${currentDate.getDate()}
+            </div>
+        `;
+    }
+
+    calendar.innerHTML = calendarHTML;
+}
+
+// Navigates the new cycle calendar
+function navigateCycleMonth(direction) {
+    currentCycleMonth += direction;
+
+    if (currentCycleMonth > 11) {
+        currentCycleMonth = 0;
+        currentCycleYear++;
+    } else if (currentCycleMonth < 0) {
+        currentCycleMonth = 11;
+        currentCycleYear--;
+    }
+
+    renderCycleHeatmap();
 }
 
 // Global functions for onclick handlers

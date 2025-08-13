@@ -17,6 +17,7 @@
                 <button class="btn btn--secondary nav-btn active" data-view="dashboard">Dashboard</button>
                 <button class="btn btn--secondary nav-btn" data-view="form">Add Entry</button>
                 <button class="btn btn--secondary nav-btn" data-view="fitness-form">Fitness Tracker</button>
+                <button class="btn btn--secondary nav-btn" data-view="cycle">Cycle Tracker</button>
                 <button class="btn btn--secondary nav-btn" data-view="table">View Data</button>
             </nav>
         </div>
@@ -129,11 +130,7 @@
 
                         <!-- PCOS & Health Markers -->
                         <fieldset class="fieldset">
-                            <legend>PCOS & Health Markers</legend>
-                            <div class="form-group">
-                                <label class="form-label" for="menstrual-cycle">Menstrual Cycle Date (optional)</label>
-                                <input type="date" id="menstrual-cycle" class="form-control">
-                            </div>
+                            <legend>Health Markers</legend>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label" for="sleep-duration">Sleep Duration (hours)</label>
@@ -346,6 +343,68 @@
                             <button type="submit" class="btn btn--primary">Save Workout</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </section>
+        <!-- Cycle Tracker View -->
+        <section id="cycle-view" class="view">
+            <div class="dashboard-grid">
+                <div class="metrics-row">
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Last Cycle Start</h3>
+                            <div class="metric-value" id="cycle-start-date">Not recorded</div>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Last Cycle End</h3>
+                            <div class="metric-value" id="cycle-end-date">Not recorded</div>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="card__body">
+                            <h3>Average Cycle Length</h3>
+                            <div class="metric-value" id="cycle-length">N/A</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card heatmap-card">
+                    <div class="card__header">
+                        <h3>Period Calendar</h3>
+                        <div class="calendar-controls">
+                            <button class="btn btn--sm" id="prev-cycle-month">&lt;</button>
+                            <span id="current-cycle-month-year"></span>
+                            <button class="btn btn--sm" id="next-cycle-month">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="card__body">
+                        <div id="cycle-heatmap-calendar"></div>
+                        <div class="heatmap-legend">
+                            <span class="legend-text">No period</span>
+                            <div class="legend-item" data-period="false"></div>
+                            <span class="legend-text">Period</span>
+                            <div class="legend-item" data-period="true"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h2>Log a Period Day</h2>
+                    </div>
+                    <div class="card__body">
+                        <form id="cycle-form">
+                            <div class="form-group">
+                                <label class="form-label" for="period-date">Date</label>
+                                <input type="date" id="period-date" class="form-control" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn--primary">Save Period Day</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>
