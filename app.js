@@ -1321,7 +1321,8 @@ function updateCycleDashboard() {
 function updateCycleStats() {
     const periodEntries = fitnessData
         .filter(entry => entry.type === 'period')
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        .map(entry => ({ ...entry, dateObj: new Date(entry.date + 'T00:00:00Z') }))
+        .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 
     const cycleStartEl = document.getElementById('cycle-start-date');
     const cycleEndEl = document.getElementById('cycle-end-date');
@@ -1396,9 +1397,9 @@ function renderCycleHeatmap() {
             .map(entry => [entry.date, entry.flowRate])
     );
 
-    const firstDay = new Date(currentCycleYear, currentCycleMonth, 1);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    const firstDayOfMonth = new Date(Date.UTC(currentCycleYear, currentCycleMonth, 1));
+    const firstDayOfWeek = firstDayOfMonth.getUTCDay();
+    const startDate = new Date(Date.UTC(currentCycleYear, currentCycleMonth, 1 - firstDayOfWeek));
 
     const daysInCalendar = 42;
     const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -1410,9 +1411,9 @@ function renderCycleHeatmap() {
 
     for (let i = 0; i < daysInCalendar; i++) {
         const currentDate = new Date(startDate);
-        currentDate.setDate(startDate.getDate() + i);
+        currentDate.setUTCDate(startDate.getUTCDate() + i);
 
-        const isCurrentMonth = currentDate.getMonth() === currentCycleMonth;
+        const isCurrentMonth = currentDate.getUTCMonth() === currentCycleMonth;
         const dateString = currentDate.toISOString().split('T')[0];
         const flowRate = periodDays.get(dateString);
         const isPeriodDay = !!flowRate;
@@ -1426,12 +1427,12 @@ function renderCycleHeatmap() {
         const tooltip = isPeriodDay ? `Period day: ${flowRate}` : 'No period';
 
         calendarHTML += `
-            <div class="${classes}" 
-                 data-tooltip="${tooltip}"
-                 data-date="${dateString}">
-                ${currentDate.getDate()}
-            </div>
-        `;
+        <div class="${classes}" 
+             data-tooltip="${tooltip}"
+             data-date="${dateString}">
+            ${currentDate.getUTCDate()}
+        </div>
+    `;
     }
 
     calendar.innerHTML = calendarHTML;
