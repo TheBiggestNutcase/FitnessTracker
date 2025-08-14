@@ -428,17 +428,13 @@ function collectFormData() {
             thighs: parseFloat(getFieldValue('thighs')) || null,
             arms: parseFloat(getFieldValue('arms')) || null
         },
-        progressPhotos: getFieldValue('progress-photos'),
         calories: parseInt(getFieldValue('calories')) || null,
         protein: parseFloat(getFieldValue('protein')) || null,
-        carbQuality: getFieldValue('carb-quality'),
         sugar: parseFloat(getFieldValue('sugar')) || null,
         waterIntake: parseFloat(getFieldValue('water-intake')) || null,
         workoutSessions: parseInt(getFieldValue('workout-sessions')) || 0,
         steps: parseInt(getFieldValue('steps')) || null,
-        strengthProgress: getFieldValue('strength-progress'),
         menstrualCycle: getFieldValue('menstrual-cycle'),
-        energyMood: getFieldValue('energy-mood'),
         sleepQuality: getFieldValue('sleep-quality'),
         sleepDuration: parseFloat(getFieldValue('sleep-duration')) || null
     };
@@ -454,9 +450,21 @@ function generateId() {
 }
 
 function addEntry(entry) {
-    fitnessData.push(entry);
+    // Check if an entry already exists for this date
+    const existingIndex = fitnessData.findIndex(existing => existing.date === entry.date);
+
+    if (existingIndex !== -1) {
+        // Merge with existing entry, keeping the existing ID
+        fitnessData[existingIndex] = { ...entry, id: fitnessData[existingIndex].id };
+        console.log('Entry merged for date:', entry.date);
+    } else {
+        // Add new entry
+        fitnessData.push(entry);
+        console.log('New entry added for date:', entry.date);
+    }
+
     sortDataByDate();
-    console.log('Entry added. Total entries:', fitnessData.length);
+    console.log('Total entries:', fitnessData.length);
 }
 
 function updateEntry(id, newData) {
@@ -577,17 +585,13 @@ function editEntry(id) {
     setFieldValue('hips', entry.measurements?.hips);
     setFieldValue('thighs', entry.measurements?.thighs);
     setFieldValue('arms', entry.measurements?.arms);
-    setFieldValue('progress-photos', entry.progressPhotos);
     setFieldValue('calories', entry.calories);
     setFieldValue('protein', entry.protein);
-    setFieldValue('carb-quality', entry.carbQuality);
     setFieldValue('sugar', entry.sugar);
     setFieldValue('water-intake', entry.waterIntake);
     setFieldValue('workout-sessions', entry.workoutSessions);
     setFieldValue('steps', entry.steps);
-    setFieldValue('strength-progress', entry.strengthProgress);
     setFieldValue('menstrual-cycle', entry.menstrualCycle);
-    setFieldValue('energy-mood', entry.energyMood);
     setFieldValue('sleep-quality', entry.sleepQuality);
     setFieldValue('sleep-duration', entry.sleepDuration);
 
@@ -930,31 +934,16 @@ function updateSleepChart() {
     }
 
     const ctx = canvas.getContext('2d');
-    const last30Days = getLast30DaysData();
 
-    // Define color scale for sleep quality
-    const qualityColors = {
-        'Excellent': '#134252',
-        'Good': '#21808D',
-        'Fair': '#2D93A0',
-        'Poor': '#32B8C6',
-        'None': 'rgba(245, 245, 245, 0.5)' // Light gray for no data
-    };
+    // Filter data for the current month and get sleep data
+    const monthData = getDaysInMonth(currentYear, currentMonth);
+    const sleepData = monthData.map(date => {
+        const dateString = date.toISOString().split('T')[0];
+        const entry = fitnessData.find(e => e.date === dateString);
+        return entry ? (entry.sleepDuration || null) : null;
+    });
 
-    const chartData = last30Days.map((entry, index) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (29 - index));
-
-        const quality = entry?.sleepQuality || 'None';
-        const duration = entry?.sleepDuration || null;
-
-        return {
-            x: date,
-            y: duration,
-            quality: quality,
-            color: qualityColors[quality]
-        };
-    }).filter(d => d.y !== null);
+    const labels = monthData.map(date => date.toLocaleDateString('en-US', { day: 'numeric' }));
 
     if (sleepChart) {
         sleepChart.destroy();
@@ -963,15 +952,30 @@ function updateSleepChart() {
     sleepChart = new Chart(ctx, {
         type: 'line',
         data: {
+            labels: labels,
             datasets: [{
                 label: 'Sleep Duration (hours)',
-                data: chartData,
+                data: sleepData,
                 borderColor: '#21808D',
-                backgroundColor: chartData.map(d => d.color),
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                fill: false,
-                tension: 0.4
+                backgroundColor: 'rgba(33, 128, 141, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: sleepData.map((value, index) => {
+                    const dateString = monthData[index].toISOString().split('T')[0];
+                    const entry = fitnessData.find(e => e.date === dateString);
+                    const quality = entry?.sleepQuality || 'None';
+
+                    // Color points based on sleep quality
+                    switch (quality) {
+                        case 'Excellent': return '#134252';
+                        case 'Good': return '#21808D';
+                        case 'Average': return '#2D93A0';
+                        case 'Poor': return '#FF5459';
+                        default: return '#E6E6E6';
+                    }
+                }),
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
@@ -984,28 +988,29 @@ function updateSleepChart() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            const dataPoint = context.raw;
-                            const date = dataPoint.x.toLocaleDateString();
-                            const duration = dataPoint.y;
-                            const quality = dataPoint.quality;
-                            return `Date: ${date}, Duration: ${duration}h, Quality: ${quality}`;
+                            const dateIndex = context.dataIndex;
+                            const dateString = monthData[dateIndex].toISOString().split('T')[0];
+                            const entry = fitnessData.find(e => e.date === dateString);
+                            const quality = entry?.sleepQuality || 'Not recorded';
+                            const duration = context.parsed.y;
+
+                            if (duration === null) return 'No sleep data';
+                            return `Duration: ${duration}h, Quality: ${quality}`;
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day'
-                    },
                     title: {
                         display: true,
-                        text: 'Date'
+                        text: 'Day of Month'
                     }
                 },
                 y: {
                     beginAtZero: false,
+                    min: 0,
+                    max: 12,
                     title: {
                         display: true,
                         text: 'Sleep Duration (hours)'
@@ -1139,29 +1144,49 @@ function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Check if file is JSON
+    if (!file.name.toLowerCase().endsWith('.json')) {
+        showStatusMessage('Error: Please select a valid JSON file', 'error');
+        e.target.value = '';
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = function (event) {
         try {
             const importedData = JSON.parse(event.target.result);
 
             if (!Array.isArray(importedData)) {
-                throw new Error('Invalid data format - expected array');
+                throw new Error('Invalid data format - expected array of entries');
+            }
+
+            if (importedData.length === 0) {
+                showStatusMessage('Warning: No entries found in the file', 'warning');
+                e.target.value = '';
+                return;
             }
 
             let merged = 0;
             let added = 0;
+            let skipped = 0;
 
             importedData.forEach(entry => {
-                if (!entry.date) return;
+                // Validate required fields
+                if (!entry.date) {
+                    skipped++;
+                    return;
+                }
 
                 const existingIndex = fitnessData.findIndex(existing =>
                     existing.date === entry.date
                 );
 
                 if (existingIndex !== -1) {
+                    // Merge with existing entry, keeping the existing ID
                     fitnessData[existingIndex] = { ...entry, id: fitnessData[existingIndex].id };
                     merged++;
                 } else {
+                    // Add new entry with generated ID
                     fitnessData.push({ ...entry, id: generateId() });
                     added++;
                 }
@@ -1169,16 +1194,32 @@ function importData(e) {
 
             sortDataByDate();
             updateTable();
-
             updateDashboard();
 
-            showStatusMessage(`Data imported! Added ${added} new entries, merged ${merged} existing entries.`, 'success');
-            console.log('Data imported:', { added, merged });
+            let message = `Data imported successfully! Added ${added} new entries`;
+            if (merged > 0) message += `, merged ${merged} existing entries`;
+            if (skipped > 0) message += `, skipped ${skipped} invalid entries`;
+
+            showStatusMessage(message, 'success');
+            console.log('Data imported:', { added, merged, skipped });
 
         } catch (error) {
             console.error('Import error:', error);
-            showStatusMessage('Error importing data: Invalid file format', 'error');
+            let errorMessage = 'Error importing data: ';
+
+            if (error instanceof SyntaxError) {
+                errorMessage += 'Invalid JSON format. Please check your file.';
+            } else {
+                errorMessage += error.message || 'Unknown error occurred';
+            }
+
+            showStatusMessage(errorMessage, 'error');
         }
+    };
+
+    reader.onerror = function() {
+        showStatusMessage('Error reading file. Please try again.', 'error');
+        console.error('FileReader error');
     };
 
     reader.readAsText(file);
